@@ -1,4 +1,4 @@
-import {_decorator, Component, instantiate, math, Node, Prefab} from 'cc'
+import {_decorator, Component, instantiate, math, Node, Prefab, Vec3} from 'cc'
 import {Bullet} from '../bullet/Bullet'
 import {Enemy, Formation} from './Const'
 import {EnemyPlane} from '../plane/EnemyPlane'
@@ -47,9 +47,8 @@ export class GameManager extends Component {
   public createEnemyInterval: number = 1
   // 当前飞机类型
   private _currentCreateEnemyTime: number = 0
-  // 当前队形
-  private _currentFormation: number = Formation.One
-
+  // 开始计时, 用于计算队形变换
+  private _beginTimer: number = 0
 
   start() {
     this._init()
@@ -63,8 +62,10 @@ export class GameManager extends Component {
       this._currentShootTime = 0
     }
 
-    // 原:保证立刻创建敌机,现: 考虑到开始留白时间,注掉此行代码
-    // this._currentCreateEnemyTime = this.createEnemyInterval
+    // 队形组合计时
+    if (this._beginTimer < 20) {
+      this._beginTimer += deltaTime
+    }
     // 创建敌机
     this._creatEnemyByFormation(deltaTime)
   }
@@ -79,8 +80,6 @@ export class GameManager extends Component {
   private _init() {
     // 确保按下时立刻发出子弹
     this._currentShootTime = this.shootTime
-    // 定时器变换队形,间隔10s变换队形
-    this.schedule(this._changeFormation, 10)
   }
 
   /**
@@ -98,44 +97,49 @@ export class GameManager extends Component {
     component.speed = this.bulletSpeed
   }
 
-  /**
-   * 队形变换
-   */
-  private _changeFormation() {
-    this._currentFormation++
-    if (this._currentFormation > Formation.Three) {
-      this._currentFormation = Formation.One
-    }
-  }
 
   /**
    * 根据队形生成飞机
    */
   private _creatEnemyByFormation(deltaTime: number) {
     this._currentCreateEnemyTime += deltaTime
-    if (this._currentCreateEnemyTime > this.createEnemyInterval) {
-      switch (this._currentFormation) {
-        case Formation.One:
-          if (this._currentCreateEnemyTime > this.createEnemyInterval) {
-            this._createEnemyPlane()
-            this._currentCreateEnemyTime = 0
-          }
-          break
-        case Formation.Two:
-          break
-        case Formation.Three:
-          break
-        default:
-          console.log('队形状态异常')
+    if (this._beginTimer < 10) {
+      // 组合1
+      if (this._currentCreateEnemyTime > this.createEnemyInterval) {
+        this._createFormationOne()
+        this._currentCreateEnemyTime = 0
       }
-      this._currentCreateEnemyTime = 0
+    } else if (this._beginTimer < 20) {
+      // 组合2
+      if (this._currentCreateEnemyTime > this.createEnemyInterval * 0.8) {
+        let formationType = math.randomRangeInt(0, 2)
+        if (formationType === Formation.One) {
+          this._createFormationOne()
+        } else {
+          this._createFormationTwo()
+        }
+        this._currentCreateEnemyTime = 0
+      }
+    } else {
+      // 组合3
+      if (this._currentCreateEnemyTime > this.createEnemyInterval * 0.6) {
+        let formationType = math.randomRangeInt(0, 3)
+        if (formationType === Formation.One) {
+          this._createFormationOne()
+        } else if (formationType === Formation.Two) {
+          this._createFormationTwo()
+        } else {
+          this._createFormationThree()
+        }
+        this._currentCreateEnemyTime = 0
+      }
     }
   }
 
   /**
-   * 生成敌机
+   * 随机选择敌机类型
    */
-  private _createEnemyPlane() {
+  private randomEnemy() {
     // 随机敌机类型,设置速度,创建飞机
     let enemyType = math.randomRangeInt(0, 2)
     let prefab: Prefab = null
@@ -147,6 +151,16 @@ export class GameManager extends Component {
       prefab = this.enemy02
       speed = this.enemy02Speed
     }
+    return {prefab, speed}
+  }
+
+  /**
+   * 队形1: 随机生成单架飞机
+   */
+  private _createFormationOne() {
+    console.log('1')
+
+    let {prefab, speed} = this.randomEnemy()
     const enemy = instantiate(prefab)
     let component = enemy.getComponent(EnemyPlane)
     component.speed = speed
@@ -154,6 +168,45 @@ export class GameManager extends Component {
     enemy.setParent(this.node)
     let x = math.randomRange(-24, 24)
     enemy.setPosition(x, 0, -50)
+  }
+
+
+  /**
+   * 队形2: 一字型队列, 包含5个飞机
+   */
+  private _createFormationTwo() {
+    console.log('2')
+    let {prefab, speed} = this.randomEnemy()
+    for (let i = 0; i < 5; i++) {
+      const enemy = instantiate(prefab)
+      let component = enemy.getComponent(EnemyPlane)
+      component.speed = speed
+      enemy.setParent(this.node)
+      enemy.setPosition(-20 + i * 10, 0, -50)
+    }
+  }
+
+  /**
+   * 队形3: V字型队列,包含7个飞机
+   */
+  private _createFormationThree() {
+    console.log('3')
+    let {prefab, speed} = this.randomEnemy()
+    let positionList = [new Vec3(-18, 0, -68), new Vec3(-12, 0, -62), new Vec3(-6, 0, -56)]
+    for (let i = 0; i < 7; i++) {
+      const enemy = instantiate(prefab)
+      let component = enemy.getComponent(EnemyPlane)
+      component.speed = speed
+      enemy.setParent(this.node)
+      if (i < 3) {
+        enemy.setPosition(positionList[i])
+      } else if (i === 3) {
+        enemy.setPosition(0, 0, -50)
+      } else {
+        let vec3 = positionList[-i + 6]
+        enemy.setPosition(-vec3.x, vec3.y, vec3.z)
+      }
+    }
   }
 }
 

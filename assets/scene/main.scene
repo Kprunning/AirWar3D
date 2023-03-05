@@ -654,7 +654,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 753.2915360501568,
+    "_orthoHeight": 640,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -813,8 +813,8 @@
       "__expectedType__": "cc.Prefab"
     },
     "enemy01Speed": 20,
-    "enemy02Speed": 12,
-    "createEnemyInterval": 1,
+    "enemy02Speed": 30,
+    "createEnemyInterval": 2,
     "_id": "1dNmV9VqFEsZeXVlUgGyqC"
   },
   {
