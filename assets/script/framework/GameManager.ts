@@ -84,7 +84,6 @@ export class GameManager extends Component {
 
   /**
    * 创建玩家子弹
-   * @private
    */
   private createPlayerBullet() {
     const bullet = instantiate(this.bullet1)
@@ -94,7 +93,21 @@ export class GameManager extends Component {
     bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
     // 设置子弹速度
     const component = bullet.getComponent(Bullet)
-    component.speed = this.bulletSpeed
+    component.init(this.bulletSpeed)
+  }
+
+
+  /**
+   * 创建敌机子弹
+   */
+  public createEnemyBullet(enemyPosition: Vec3) {
+    const bullet = instantiate(this.bullet1)
+    bullet.setParent(this.bulletRoot)
+    // 设置子弹位置
+    bullet.setPosition(enemyPosition.x, enemyPosition.y, enemyPosition.z + 6)
+    // 设置子弹速度
+    const component = bullet.getComponent(Bullet)
+    component.init(this.bulletSpeed, true)
   }
 
 
@@ -156,14 +169,14 @@ export class GameManager extends Component {
 
   /**
    * 队形1: 随机生成单架飞机
+   * 队形1特点: 发射字典
    */
   private _createFormationOne() {
-    console.log('1')
-
     let {prefab, speed} = this.randomEnemy()
     const enemy = instantiate(prefab)
     let component = enemy.getComponent(EnemyPlane)
-    component.speed = speed
+    // 队形1发射子弹
+    component.init(speed, true, this)
     // 设置父节点,随机x位置,设置位置
     enemy.setParent(this.node)
     let x = math.randomRange(-24, 24)
@@ -175,12 +188,11 @@ export class GameManager extends Component {
    * 队形2: 一字型队列, 包含5个飞机
    */
   private _createFormationTwo() {
-    console.log('2')
     let {prefab, speed} = this.randomEnemy()
     for (let i = 0; i < 5; i++) {
       const enemy = instantiate(prefab)
       let component = enemy.getComponent(EnemyPlane)
-      component.speed = speed
+      component.init(speed)
       enemy.setParent(this.node)
       enemy.setPosition(-20 + i * 10, 0, -50)
     }
@@ -190,13 +202,12 @@ export class GameManager extends Component {
    * 队形3: V字型队列,包含7个飞机
    */
   private _createFormationThree() {
-    console.log('3')
     let {prefab, speed} = this.randomEnemy()
     let positionList = [new Vec3(-18, 0, -68), new Vec3(-12, 0, -62), new Vec3(-6, 0, -56)]
     for (let i = 0; i < 7; i++) {
       const enemy = instantiate(prefab)
       let component = enemy.getComponent(EnemyPlane)
-      component.speed = speed
+      component.init(speed)
       enemy.setParent(this.node)
       if (i < 3) {
         enemy.setPosition(positionList[i])
