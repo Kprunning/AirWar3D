@@ -1,4 +1,5 @@
 import {_decorator, Collider, Component, EventTouch, input, Input, ITriggerEvent} from 'cc'
+import {CollisionType} from '../framework/Const'
 
 const {ccclass, property} = _decorator
 
@@ -38,7 +39,11 @@ export class Player extends Component {
    * @param event 碰撞事件
    */
   private _onTriggerEnter(event: ITriggerEvent) {
-    console.log('play hit')
+    let group = event.otherCollider.getGroup()
+    // 如果碰撞的不是道具,玩家掉血
+    if (group !== CollisionType.BULLET_PROP) {
+      console.log('play hit')
+    }
   }
 }
 

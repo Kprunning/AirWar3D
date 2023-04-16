@@ -1,7 +1,8 @@
-import {_decorator, Component, instantiate, math, Node, Prefab, Vec3} from 'cc'
+import {_decorator, BoxCollider, Component, instantiate, macro, math, Node, Prefab, Vec3} from 'cc'
 import {Bullet} from '../bullet/Bullet'
-import {EnemyType, Formation} from './Const'
+import {BulletPropType, CollisionType, EnemyType, Formation} from './Const'
 import {Enemy} from '../plane/Enemy'
+import {BULLET_PROP_X_RANGE, BulletProp} from '../bullet/BulletProp'
 
 const {ccclass, property} = _decorator
 
@@ -22,6 +23,16 @@ export class GameManager extends Component {
   public bullet4: Prefab = null
   @property(Prefab)
   public bullet5: Prefab = null
+
+  // 子弹道具
+  @property(Prefab)
+  public bulletH: Prefab = null
+  @property(Prefab)
+  public bulletS: Prefab = null
+  @property(Prefab)
+  public bulletM: Prefab = null
+
+
   // 射击周期
   @property
   public shootTime: number = 0.3
@@ -41,13 +52,17 @@ export class GameManager extends Component {
   public enemy02: Prefab = null
   // 敌机速度设置
   @property
-  public enemy01Speed: number = 1
+  public enemy01Speed: number = 20
   @property
-  public enemy02Speed: number = 0.5
+  public enemy02Speed: number = 30
+  // 子弹道具速度
+  @property
+  public bulletPropSpeed: number = 15
+
 
   // 生成飞机间隔
   @property
-  public createEnemyInterval: number = 1
+  public createEnemyInterval: number = 2
   // 当前飞机类型
   private _currentCreateEnemyTime: number = 0
   // 开始计时, 用于计算队形变换
@@ -83,20 +98,25 @@ export class GameManager extends Component {
   private _init() {
     // 确保按下时立刻发出子弹
     this._currentShootTime = this.shootTime
+    // 每隔10s生成道具
+    this.schedule(this.createBulletProp, 10, macro.REPEAT_FOREVER)
   }
 
   /**
    * 创建玩家子弹
    */
   private createPlayerBullet() {
-    const bullet = instantiate(this.bullet2)
+    const bullet = instantiate(this.bullet1)
     bullet.setParent(this.bulletRoot)
     let playerPosition = this.playerPlane.position
     // 设置子弹位置
     bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
     // 设置子弹速度
-    const component = bullet.getComponent(Bullet)
-    component.init(this.bulletSpeed)
+    const bulletComponent = bullet.getComponent(Bullet)
+    bulletComponent.init(this.bulletSpeed)
+    // 因为子弹共用,所以设置下分组
+    let collider = bullet.getComponent(BoxCollider)
+    collider.setGroup(CollisionType.PLAYER_BULLET)
   }
 
 
@@ -109,8 +129,11 @@ export class GameManager extends Component {
     // 设置子弹位置
     bullet.setPosition(enemyPosition.x, enemyPosition.y, enemyPosition.z + 6)
     // 设置子弹速度
-    const component = bullet.getComponent(Bullet)
-    component.init(this.bulletSpeed, true)
+    const bulletComponent = bullet.getComponent(Bullet)
+    bulletComponent.init(this.bulletSpeed, true)
+    // 因为子弹共用,所以设置下分组
+    let collider = bullet.getComponent(BoxCollider)
+    collider.setGroup(CollisionType.ENEMY_BULLET)
   }
 
 
@@ -224,10 +247,41 @@ export class GameManager extends Component {
   }
 
   /**
+   * 创建子弹道具
+   * @private
+   */
+  private createBulletProp() {
+    let type = math.randomRangeInt(0, 3)
+    let prefab: Prefab
+    if (type === BulletPropType.BULLET_H) {
+      prefab = this.bulletH
+    } else if (type === BulletPropType.BULLET_S) {
+      prefab = this.bulletS
+    } else {
+      prefab = this.bulletM
+    }
+    let bulletProp = instantiate(prefab)
+    bulletProp.setParent(this.node)
+    // 初始化放在右边
+    bulletProp.setPosition(BULLET_PROP_X_RANGE, 0, -50)
+    let component = bulletProp.getComponent(BulletProp)
+    // 初始化道具脚本属性
+    component.init(this.bulletPropSpeed, this)
+  }
+
+  /**
    * 消灭敌机,分数增加
    */
   public addScore() {
     console.log('add score')
+  }
+
+  /**
+   * 根据道具切换子弹类型
+   * @param bulletPropType 子弹道具类型
+   */
+  public changeBulletType(bulletPropType: BulletPropType) {
+    console.log(`当前子弹类型${bulletPropType}`)
   }
 }
 
