@@ -1,7 +1,7 @@
 import {_decorator, Component, instantiate, math, Node, Prefab, Vec3} from 'cc'
 import {Bullet} from '../bullet/Bullet'
-import {Enemy, Formation} from './Const'
-import {EnemyPlane} from '../plane/EnemyPlane'
+import {EnemyType, Formation} from './Const'
+import {Enemy} from '../plane/Enemy'
 
 const {ccclass, property} = _decorator
 
@@ -9,6 +9,9 @@ const {ccclass, property} = _decorator
 export class GameManager extends Component {
   @property(Node)
   public playerPlane: Node = null
+  /**
+   * 除了1为敌机子弹,其他都为玩家子弹
+   */
   @property(Prefab)
   public bullet1: Prefab = null
   @property(Prefab)
@@ -86,7 +89,7 @@ export class GameManager extends Component {
    * 创建玩家子弹
    */
   private createPlayerBullet() {
-    const bullet = instantiate(this.bullet1)
+    const bullet = instantiate(this.bullet2)
     bullet.setParent(this.bulletRoot)
     let playerPosition = this.playerPlane.position
     // 设置子弹位置
@@ -157,10 +160,10 @@ export class GameManager extends Component {
     let enemyType = math.randomRangeInt(0, 2)
     let prefab: Prefab = null
     let speed: number = 0
-    if (enemyType === Enemy.One) {
+    if (enemyType === EnemyType.One) {
       prefab = this.enemy01
       speed = this.enemy01Speed
-    } else if (enemyType === Enemy.Two) {
+    } else if (enemyType === EnemyType.Two) {
       prefab = this.enemy02
       speed = this.enemy02Speed
     }
@@ -174,9 +177,9 @@ export class GameManager extends Component {
   private _createFormationOne() {
     let {prefab, speed} = this.randomEnemy()
     const enemy = instantiate(prefab)
-    let component = enemy.getComponent(EnemyPlane)
+    let component = enemy.getComponent(Enemy)
     // 队形1发射子弹
-    component.init(speed, true, this)
+    component.init(speed, this, true)
     // 设置父节点,随机x位置,设置位置
     enemy.setParent(this.node)
     let x = math.randomRange(-24, 24)
@@ -191,8 +194,8 @@ export class GameManager extends Component {
     let {prefab, speed} = this.randomEnemy()
     for (let i = 0; i < 5; i++) {
       const enemy = instantiate(prefab)
-      let component = enemy.getComponent(EnemyPlane)
-      component.init(speed)
+      let component = enemy.getComponent(Enemy)
+      component.init(speed, this)
       enemy.setParent(this.node)
       enemy.setPosition(-20 + i * 10, 0, -50)
     }
@@ -206,8 +209,8 @@ export class GameManager extends Component {
     let positionList = [new Vec3(-18, 0, -68), new Vec3(-12, 0, -62), new Vec3(-6, 0, -56)]
     for (let i = 0; i < 7; i++) {
       const enemy = instantiate(prefab)
-      let component = enemy.getComponent(EnemyPlane)
-      component.init(speed)
+      let component = enemy.getComponent(Enemy)
+      component.init(speed, this)
       enemy.setParent(this.node)
       if (i < 3) {
         enemy.setPosition(positionList[i])
@@ -218,6 +221,13 @@ export class GameManager extends Component {
         enemy.setPosition(-vec3.x, vec3.y, vec3.z)
       }
     }
+  }
+
+  /**
+   * 消灭敌机,分数增加
+   */
+  public addScore() {
+    console.log('add score')
   }
 }
 

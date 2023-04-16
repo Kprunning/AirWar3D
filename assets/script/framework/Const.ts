@@ -1,7 +1,7 @@
 /**
  * 敌机枚举
  */
-export enum Enemy {
+export enum EnemyType {
   One,
   Two
 }
