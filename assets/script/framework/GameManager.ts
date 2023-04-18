@@ -44,6 +44,8 @@ export class GameManager extends Component {
   public bulletRoot: Node = null
   @property
   public bulletSpeed: number = 1
+  // 当前玩家子弹类型
+  private _playBulletType: BulletPropType = BulletPropType.BULLET_DEFAULT
 
   // 敌机管理
   @property(Prefab)
@@ -76,7 +78,7 @@ export class GameManager extends Component {
     this._currentShootTime += deltaTime
     // 控制玩家子弹发射
     if (this._isShooting && this._currentShootTime > this.shootTime) {
-      this.createPlayerBullet()
+      this._playerFire()
       this._currentShootTime = 0
     }
 
@@ -101,24 +103,6 @@ export class GameManager extends Component {
     // 每隔10s生成道具
     this.schedule(this.createBulletProp, 10, macro.REPEAT_FOREVER)
   }
-
-  /**
-   * 创建玩家子弹
-   */
-  private createPlayerBullet() {
-    const bullet = instantiate(this.bullet1)
-    bullet.setParent(this.bulletRoot)
-    let playerPosition = this.playerPlane.position
-    // 设置子弹位置
-    bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
-    // 设置子弹速度
-    const bulletComponent = bullet.getComponent(Bullet)
-    bulletComponent.init(this.bulletSpeed)
-    // 因为子弹共用,所以设置下分组
-    let collider = bullet.getComponent(BoxCollider)
-    collider.setGroup(CollisionType.PLAYER_BULLET)
-  }
-
 
   /**
    * 创建敌机子弹
@@ -281,7 +265,101 @@ export class GameManager extends Component {
    * @param bulletPropType 子弹道具类型
    */
   public changeBulletType(bulletPropType: BulletPropType) {
-    console.log(`当前子弹类型${bulletPropType}`)
+    console.log(bulletPropType)
+    this._playBulletType = bulletPropType
+  }
+
+  /**
+   * 玩家开火发射子弹
+   * @private
+   */
+  private _playerFire() {
+    console.log(this._playBulletType)
+    switch (this._playBulletType) {
+      case BulletPropType.BULLET_H:
+        this._createBulletH()
+        break
+      case BulletPropType.BULLET_S:
+        this._createBulletS()
+        break
+      case BulletPropType.BULLET_M:
+        this._createBulletM()
+        break
+      default:
+        this._createBulletFault()
+    }
+  }
+
+  /**
+   * 创建子弹类型M
+   * 两列平行发射
+   */
+  private _createBulletM() {
+    for (let i = 0; i < 2; i++) {
+      const bullet = instantiate(this.bullet2)
+      bullet.setParent(this.bulletRoot)
+      let playerPosition = this.playerPlane.position
+      // 设置子弹位置
+      bullet.setPosition(i === 0 ? playerPosition.x - 3 : playerPosition.x + 3, playerPosition.y, playerPosition.z - 7)
+      // 设置子弹速度
+      const bulletComponent = bullet.getComponent(Bullet)
+      bulletComponent.init(this.bulletSpeed)
+    }
+  }
+
+
+  /**
+   * 创建子弹类型H
+   * 3条子弹,呈扇形
+   */
+  private _createBulletH() {
+    for (let i = 0; i < 3; i++) {
+      const bullet = instantiate(this.bullet3)
+      bullet.setParent(this.bulletRoot)
+      let playerPosition = this.playerPlane.position
+      // 设置子弹位置
+      bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
+      // 设置子弹速度
+      const bulletComponent = bullet.getComponent(Bullet)
+      bulletComponent.init(this.bulletSpeed, false, i)
+    }
+  }
+
+
+  /**
+   * 创建子弹类型S
+   * 追踪敌机,持续15s后切换回默认子弹
+   */
+  private _createBulletS() {
+    for (let i = 0; i < 3; i++) {
+      const bullet = instantiate(this.bullet3)
+      bullet.setParent(this.bulletRoot)
+      let playerPosition = this.playerPlane.position
+      // 设置子弹位置
+      bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
+      // 设置子弹速度
+      const bulletComponent = bullet.getComponent(Bullet)
+      bulletComponent.init(this.bulletSpeed, false, i)
+    }
+  }
+
+
+  /**
+   * 创建玩家默认子弹
+   */
+  private _createBulletFault() {
+    const bullet = instantiate(this.bullet1)
+    bullet.setParent(this.bulletRoot)
+    let playerPosition = this.playerPlane.position
+    // 设置子弹位置
+    bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
+    // 设置子弹速度
+    const bulletComponent = bullet.getComponent(Bullet)
+    bulletComponent.init(this.bulletSpeed)
+    // 因为子弹共用,所以设置下分组
+    let collider = bullet.getComponent(BoxCollider)
+    collider.setGroup(CollisionType.PLAYER_BULLET)
+    collider.setMask(CollisionType.ENEMY)
   }
 }
 

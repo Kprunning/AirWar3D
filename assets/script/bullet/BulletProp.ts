@@ -63,9 +63,9 @@ export class BulletProp extends Component {
    */
   private _onTriggerEnter(event: ITriggerEvent) {
     let name = event.selfCollider.name
-    if (name === 'bulletH') {
+    if (name === 'bulletH<BoxCollider>') {
       this._gameManager.changeBulletType(BulletPropType.BULLET_H)
-    } else if (name === 'bulletS') {
+    } else if (name === 'bulletS<BoxCollider>') {
       this._gameManager.changeBulletType(BulletPropType.BULLET_S)
     } else {
       this._gameManager.changeBulletType(BulletPropType.BULLET_M)

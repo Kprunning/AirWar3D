@@ -27,7 +27,7 @@ export enum Formation {
  */
 export enum CollisionType {
   PLAYER = 1 << 1,
-  ENEMY1 = 1 << 2,
+  ENEMY = 1 << 2,
   PLAYER_BULLET = 1 << 3,
   ENEMY_BULLET = 1 << 4,
   BULLET_PROP = 1 << 5
@@ -39,5 +39,16 @@ export enum CollisionType {
 export enum BulletPropType {
   BULLET_M,
   BULLET_H,
-  BULLET_S
+  BULLET_S,
+  BULLET_DEFAULT
+}
+
+
+/**
+ * 子弹方向
+ */
+export enum BulletDirection {
+  LEFT,
+  MIDDLE,
+  RIGHT
 }
