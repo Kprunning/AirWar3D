@@ -50,5 +50,6 @@ export enum BulletPropType {
 export enum BulletDirection {
   LEFT,
   MIDDLE,
-  RIGHT
+  RIGHT,
+  TRACE
 }

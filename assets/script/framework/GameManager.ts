@@ -1,6 +1,6 @@
 import {_decorator, BoxCollider, Component, instantiate, macro, math, Node, Prefab, Vec3} from 'cc'
 import {Bullet} from '../bullet/Bullet'
-import {BulletPropType, CollisionType, EnemyType, Formation} from './Const'
+import {BulletDirection, BulletPropType, CollisionType, EnemyType, Formation} from './Const'
 import {Enemy} from '../plane/Enemy'
 import {BULLET_PROP_X_RANGE, BulletProp} from '../bullet/BulletProp'
 
@@ -44,6 +44,8 @@ export class GameManager extends Component {
   public bulletRoot: Node = null
   @property
   public bulletSpeed: number = 1
+  @property
+  public traceBulletSpeed: number = 1
   // 当前玩家子弹类型
   private _playBulletType: BulletPropType = BulletPropType.BULLET_DEFAULT
 
@@ -69,6 +71,8 @@ export class GameManager extends Component {
   private _currentCreateEnemyTime: number = 0
   // 开始计时, 用于计算队形变换
   private _beginTimer: number = 0
+  // 存放已经被追踪的敌人id
+  private _tracedEnemyIdList: string[] = []
 
   start() {
     this._init()
@@ -274,7 +278,6 @@ export class GameManager extends Component {
    * @private
    */
   private _playerFire() {
-    console.log(this._playBulletType)
     switch (this._playBulletType) {
       case BulletPropType.BULLET_H:
         this._createBulletH()
@@ -331,16 +334,28 @@ export class GameManager extends Component {
    * 追踪敌机,持续15s后切换回默认子弹
    */
   private _createBulletS() {
-    for (let i = 0; i < 3; i++) {
-      const bullet = instantiate(this.bullet3)
-      bullet.setParent(this.bulletRoot)
-      let playerPosition = this.playerPlane.position
-      // 设置子弹位置
-      bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
-      // 设置子弹速度
-      const bulletComponent = bullet.getComponent(Bullet)
-      bulletComponent.init(this.bulletSpeed, false, i)
-    }
+    const bullet = instantiate(this.bullet5)
+    bullet.setParent(this.bulletRoot)
+    let playerPosition = this.playerPlane.position
+    // 设置子弹位置
+    bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
+    // 设置子弹速度
+    const bulletComponent = bullet.getComponent(Bullet)
+    // // 获取追踪的敌人id列表
+    // let enemyList = this.node.children
+    // let enemyIdList = enemyList.map(item => item.uuid)
+    // // 过滤已经销毁的敌人
+    // this._tracedEnemyIdList = this._tracedEnemyIdList.filter(item => enemyIdList.indexOf(item) !== -1)
+    // // 获取要追踪的敌人
+    // let targetEnemyList = enemyList.filter(item => (item.name === 'enemy01' || item.name === 'enemy02') && this._tracedEnemyIdList.indexOf(item.uuid) === -1)
+    // let enemyId
+    // if (targetEnemyList.length === 0) {
+    //   enemyId = ''
+    // } else {
+    //   enemyId = targetEnemyList[0].uuid
+    // }
+    // this._tracedEnemyIdList.push(enemyId)
+    bulletComponent.init(this.traceBulletSpeed, false, BulletDirection.TRACE, this, '')
   }
 
 

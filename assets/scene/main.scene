@@ -818,6 +818,7 @@
       "__id__": 30
     },
     "bulletSpeed": 40,
+    "traceBulletSpeed": 60,
     "enemy01": {
       "__uuid__": "e5c24b7b-5f15-4711-b20c-7aecfac72e0e",
       "__expectedType__": "cc.Prefab"
