@@ -1,15 +1,16 @@
-import {_decorator, BoxCollider, Component, instantiate, macro, math, Node, Prefab, Vec3} from 'cc'
+import {_decorator, BoxCollider, Component, instantiate, Label, macro, math, Node, Prefab, Vec3} from 'cc'
 import {Bullet} from '../bullet/Bullet'
 import {BulletDirection, BulletPropType, CollisionType, EnemyType, Formation} from './Const'
 import {Enemy} from '../plane/Enemy'
 import {BULLET_PROP_X_RANGE, BulletProp} from '../bullet/BulletProp'
+import {Player} from '../plane/Player'
 
 const {ccclass, property} = _decorator
 
 @ccclass('GameManager')
 export class GameManager extends Component {
-  @property(Node)
-  public playerPlane: Node = null
+  @property(Player)
+  public playerPlane: Player = null
   /**
    * 除了1为敌机子弹,其他都为玩家子弹
    */
@@ -38,6 +39,7 @@ export class GameManager extends Component {
   public shootTime: number = 0.3
   private _currentShootTime: number = 0
   private _isShooting: boolean = false
+  public isGameStart: boolean = false
 
   // 子弹管理节点
   @property(Node)
@@ -74,11 +76,36 @@ export class GameManager extends Component {
   // 存放已经被追踪的敌人id
   private _tracedEnemyIdList: string[] = []
 
+
+  // 分数
+  private _score: number = 0
+
+  // 游戏节点
+  @property(Node)
+  public gamePage: Node = null
+  // 游戏结束节点
+  @property(Node)
+  public gameOverPage: Node = null
+  // 游戏进行时, 实时分数
+  @property(Label)
+  public gameScore: Label = null
+  // 游戏结束时分数
+  @property(Label)
+  public gameOverScore: Label = null
+
+
   start() {
     this._init()
   }
 
   update(deltaTime: number) {
+    if (!this.isGameStart) {
+      return
+    }
+    if (this.playerPlane.isDie) {
+      this.gameOver()
+      return
+    }
     this._currentShootTime += deltaTime
     // 控制玩家子弹发射
     if (this._isShooting && this._currentShootTime > this.shootTime) {
@@ -104,8 +131,6 @@ export class GameManager extends Component {
   private _init() {
     // 确保按下时立刻发出子弹
     this._currentShootTime = this.shootTime
-    // 每隔10s生成道具
-    this.schedule(this.createBulletProp, 10, macro.REPEAT_FOREVER)
   }
 
   /**
@@ -238,7 +263,7 @@ export class GameManager extends Component {
    * 创建子弹道具
    * @private
    */
-  private createBulletProp() {
+  private _createBulletProp() {
     let type = math.randomRangeInt(0, 3)
     let prefab: Prefab
     if (type === BulletPropType.BULLET_H) {
@@ -261,7 +286,8 @@ export class GameManager extends Component {
    * 消灭敌机,分数增加
    */
   public addScore() {
-    console.log('add score')
+    this._score += 1
+    this.gameScore.string = this._score.toString()
   }
 
   /**
@@ -269,7 +295,6 @@ export class GameManager extends Component {
    * @param bulletPropType 子弹道具类型
    */
   public changeBulletType(bulletPropType: BulletPropType) {
-    console.log(bulletPropType)
     this._playBulletType = bulletPropType
   }
 
@@ -301,7 +326,7 @@ export class GameManager extends Component {
     for (let i = 0; i < 2; i++) {
       const bullet = instantiate(this.bullet2)
       bullet.setParent(this.bulletRoot)
-      let playerPosition = this.playerPlane.position
+      let playerPosition = this.playerPlane.node.position
       // 设置子弹位置
       bullet.setPosition(i === 0 ? playerPosition.x - 3 : playerPosition.x + 3, playerPosition.y, playerPosition.z - 7)
       // 设置子弹速度
@@ -319,7 +344,7 @@ export class GameManager extends Component {
     for (let i = 0; i < 3; i++) {
       const bullet = instantiate(this.bullet3)
       bullet.setParent(this.bulletRoot)
-      let playerPosition = this.playerPlane.position
+      let playerPosition = this.playerPlane.node.position
       // 设置子弹位置
       bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
       // 设置子弹速度
@@ -336,7 +361,7 @@ export class GameManager extends Component {
   private _createBulletS() {
     const bullet = instantiate(this.bullet5)
     bullet.setParent(this.bulletRoot)
-    let playerPosition = this.playerPlane.position
+    let playerPosition = this.playerPlane.node.position
     // 设置子弹位置
     bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
     // 设置子弹速度
@@ -365,7 +390,7 @@ export class GameManager extends Component {
   private _createBulletFault() {
     const bullet = instantiate(this.bullet1)
     bullet.setParent(this.bulletRoot)
-    let playerPosition = this.playerPlane.position
+    let playerPosition = this.playerPlane.node.position
     // 设置子弹位置
     bullet.setPosition(playerPosition.x, playerPosition.y, playerPosition.z - 7)
     // 设置子弹速度
@@ -375,6 +400,46 @@ export class GameManager extends Component {
     let collider = bullet.getComponent(BoxCollider)
     collider.setGroup(CollisionType.PLAYER_BULLET)
     collider.setMask(CollisionType.ENEMY)
+  }
+
+  public returnMain() {
+    this._resetProp()
+  }
+
+  public gameStart() {
+    this.isGameStart = true
+    this.schedule(this._createBulletProp, 10, macro.REPEAT_FOREVER)
+  }
+
+  public reStart() {
+    this._resetProp()
+    this.gameStart()
+  }
+
+  public gameOver() {
+    // 每隔10s生成道具
+    this.schedule(this._createBulletProp, 10, macro.REPEAT_FOREVER)
+    this.isGameStart = false
+    this.gamePage.active = false
+    this.gameOverPage.active = true
+    this.gameOverScore.string = this._score.toString()
+    this._isShooting = false
+    this.unschedule(this._createBulletProp)
+    // 销毁场景中的敌机和子弹
+    this.node.destroyAllChildren()
+    this.bulletRoot.destroyAllChildren()
+  }
+
+  private _resetProp() {
+    this._currentShootTime = 0
+    this._isShooting = false
+    this._currentCreateEnemyTime = 0
+    this._beginTimer = 0
+    this._playBulletType = BulletPropType.BULLET_DEFAULT
+    this.playerPlane.node.setPosition(0, 0, 20)
+    this._score = 0
+    this.gameScore.string = '0'
+    this.playerPlane.init()
   }
 }
 

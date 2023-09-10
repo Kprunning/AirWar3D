@@ -28,7 +28,7 @@ export class BgControl extends Component {
    * @param deltaTime 帧间隔时间
    * @private
    */
-  private _moveBackground(deltaTime) {
+  private _moveBackground(deltaTime: number) {
     // 1.移动背景
     this.bg1.setPosition(0, 0, this.bg1.position.z + this._bgSpeed * deltaTime)
     this.bg2.setPosition(0, 0, this.bg2.position.z + this._bgSpeed * deltaTime)

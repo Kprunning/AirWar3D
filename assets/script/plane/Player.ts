@@ -5,6 +5,13 @@ const {ccclass, property} = _decorator
 
 @ccclass('Player')
 export class Player extends Component {
+  // 初始玩家血量
+  @property
+  public lifeValue: number = 5
+  // 当前玩家血量
+  private _currentLife: number = 0
+
+  public isDie: boolean = false
 
   @property
   public speed: number = 5
@@ -25,6 +32,11 @@ export class Player extends Component {
     collider.off('onTriggerEnter', this._onTriggerEnter, this)
   }
 
+  public init() {
+    this.isDie = false
+    this._currentLife = this.lifeValue
+  }
+
   /**
    * 飞机移动
    */
@@ -43,6 +55,10 @@ export class Player extends Component {
     // 如果碰撞的不是道具,玩家掉血
     if (group !== CollisionType.BULLET_PROP) {
       console.log('play hit')
+      this._currentLife -= 1
+      if (this._currentLife <= 0) {
+        this.isDie = true
+      }
     }
   }
 }
