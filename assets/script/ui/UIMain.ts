@@ -40,6 +40,7 @@ export class UIMain extends Component {
   public reStart() {
     this.gameOver.active = false
     this.game.active = true
+    this.gameManager.playAudio('button')
     this.gameManager.reStart()
   }
 
@@ -49,6 +50,7 @@ export class UIMain extends Component {
   public returnMain() {
     this.gameOver.active = false
     this.gameStart.active = true
+    this.gameManager.playAudio('button')
     this.gameManager.returnMain()
   }
 
@@ -61,6 +63,7 @@ export class UIMain extends Component {
     } else {
       this.gameStart.active = false
       this.game.active = true
+      this.gameManager.playAudio('button')
       this.gameManager.gameStart()
     }
   }

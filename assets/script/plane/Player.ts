@@ -1,4 +1,4 @@
-import {_decorator, Collider, Component, EventTouch, input, Input, ITriggerEvent} from 'cc'
+import {_decorator, Collider, Component, EventTouch, input, Input, ITriggerEvent,AudioSource} from 'cc'
 import {CollisionType} from '../framework/Const'
 
 const {ccclass, property} = _decorator
@@ -16,15 +16,14 @@ export class Player extends Component {
   @property
   public speed: number = 5
 
+  private _audioSource: AudioSource = null
+
   start() {
     input.on(Input.EventType.TOUCH_MOVE, this._touchMove, this)
     // 启用碰撞检测
     let collider = this.getComponent(Collider)
     collider.on('onTriggerEnter', this._onTriggerEnter, this)
-  }
-
-  update(deltaTime: number) {
-
+    this._audioSource = this.getComponent(AudioSource)
   }
 
   onDisable() {
@@ -54,10 +53,10 @@ export class Player extends Component {
     let group = event.otherCollider.getGroup()
     // 如果碰撞的不是道具,玩家掉血
     if (group !== CollisionType.BULLET_PROP) {
-      console.log('play hit')
       this._currentLife -= 1
       if (this._currentLife <= 0) {
         this.isDie = true
+        this._audioSource.play()
       }
     }
   }

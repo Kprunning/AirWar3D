@@ -70,6 +70,7 @@ export class Enemy extends Component {
   private _onTriggerEnter(event: ITriggerEvent) {
     this._gameManager.addScore()
     this.node.destroy()
+    this._gameManager.playAudio('enemy')
   }
 }
 

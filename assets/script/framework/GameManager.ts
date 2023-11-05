@@ -4,6 +4,7 @@ import {BulletDirection, BulletPropType, CollisionType, EnemyType, Formation} fr
 import {Enemy} from '../plane/Enemy'
 import {BULLET_PROP_X_RANGE, BulletProp} from '../bullet/BulletProp'
 import {Player} from '../plane/Player'
+import {AudioManager} from './AudioManager'
 
 const {ccclass, property} = _decorator
 
@@ -93,6 +94,10 @@ export class GameManager extends Component {
   @property(Label)
   public gameOverScore: Label = null
 
+  // 音效管理(子弹,敌机销毁,按钮)
+  @property(AudioManager)
+  public audioEffect: AudioManager = null
+
 
   start() {
     this._init()
@@ -110,6 +115,7 @@ export class GameManager extends Component {
     // 控制玩家子弹发射
     if (this._isShooting && this._currentShootTime > this.shootTime) {
       this._playerFire()
+      this.playAudio(`bullet${this._playBulletType % 2 + 1}`)
       this._currentShootTime = 0
     }
 
@@ -149,6 +155,59 @@ export class GameManager extends Component {
     collider.setGroup(CollisionType.ENEMY_BULLET)
   }
 
+
+  /**
+   * 消灭敌机,分数增加
+   */
+  public addScore() {
+    this._score += 1
+    this.gameScore.string = this._score.toString()
+  }
+
+  /**
+   * 根据道具切换子弹类型
+   * @param bulletPropType 子弹道具类型
+   */
+  public changeBulletType(bulletPropType: BulletPropType) {
+    this._playBulletType = bulletPropType
+  }
+
+
+  public returnMain() {
+    this._resetProp()
+  }
+
+  public gameStart() {
+    this.isGameStart = true
+    this.schedule(this._createBulletProp, 10, macro.REPEAT_FOREVER)
+  }
+
+  public reStart() {
+    this._resetProp()
+    this.gameStart()
+  }
+
+  /**
+   * 播放音效
+   * @param name 音效名称
+   */
+  public playAudio(name: string) {
+    this.audioEffect.play(name)
+  }
+
+  public gameOver() {
+    // 每隔10s生成道具
+    this.schedule(this._createBulletProp, 10, macro.REPEAT_FOREVER)
+    this.isGameStart = false
+    this.gamePage.active = false
+    this.gameOverPage.active = true
+    this.gameOverScore.string = this._score.toString()
+    this._isShooting = false
+    this.unschedule(this._createBulletProp)
+    // 销毁场景中的敌机和子弹
+    this.node.destroyAllChildren()
+    this.bulletRoot.destroyAllChildren()
+  }
 
   /**
    * 根据队形生成飞机
@@ -208,7 +267,7 @@ export class GameManager extends Component {
 
   /**
    * 队形1: 随机生成单架飞机
-   * 队形1特点: 发射字典
+   * 队形1特点: 发射子弹
    */
   private _createFormationOne() {
     let {prefab, speed} = this.randomEnemy()
@@ -282,21 +341,6 @@ export class GameManager extends Component {
     component.init(this.bulletPropSpeed, this)
   }
 
-  /**
-   * 消灭敌机,分数增加
-   */
-  public addScore() {
-    this._score += 1
-    this.gameScore.string = this._score.toString()
-  }
-
-  /**
-   * 根据道具切换子弹类型
-   * @param bulletPropType 子弹道具类型
-   */
-  public changeBulletType(bulletPropType: BulletPropType) {
-    this._playBulletType = bulletPropType
-  }
 
   /**
    * 玩家开火发射子弹
@@ -402,33 +446,6 @@ export class GameManager extends Component {
     collider.setMask(CollisionType.ENEMY)
   }
 
-  public returnMain() {
-    this._resetProp()
-  }
-
-  public gameStart() {
-    this.isGameStart = true
-    this.schedule(this._createBulletProp, 10, macro.REPEAT_FOREVER)
-  }
-
-  public reStart() {
-    this._resetProp()
-    this.gameStart()
-  }
-
-  public gameOver() {
-    // 每隔10s生成道具
-    this.schedule(this._createBulletProp, 10, macro.REPEAT_FOREVER)
-    this.isGameStart = false
-    this.gamePage.active = false
-    this.gameOverPage.active = true
-    this.gameOverScore.string = this._score.toString()
-    this._isShooting = false
-    this.unschedule(this._createBulletProp)
-    // 销毁场景中的敌机和子弹
-    this.node.destroyAllChildren()
-    this.bulletRoot.destroyAllChildren()
-  }
 
   private _resetProp() {
     this._currentShootTime = 0
@@ -441,6 +458,7 @@ export class GameManager extends Component {
     this.gameScore.string = '0'
     this.playerPlane.init()
   }
+
 }
 
 
