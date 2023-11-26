@@ -1,5 +1,7 @@
 import {_decorator, Collider, Component, ITriggerEvent} from 'cc'
 import {GameManager} from '../framework/GameManager'
+import {PoolManager} from '../framework/PoolManager'
+import {CollisionType} from '../framework/Const'
 
 const {property, ccclass} = _decorator
 
@@ -20,7 +22,8 @@ export class Enemy extends Component {
   // 游戏管理
   private _gameManager: GameManager = null
 
-  start() {
+  // 从节点池拿取时需要重新启用碰撞检测
+  onEnable() {
     // 启用碰撞检测
     let collider = this.getComponent(Collider)
     collider.on('onTriggerEnter', this._onTriggerEnter, this)
@@ -33,7 +36,7 @@ export class Enemy extends Component {
     this.node.setPosition(position.x, position.y, z)
     // 超出屏幕下方销毁敌机
     if (z > OUT_OF_BOTTOM) {
-      this.node.destroy()
+      PoolManager.instance().putNode(this.node)
     }
     // 2.子弹发射
     if (this._isFire) {
@@ -69,7 +72,7 @@ export class Enemy extends Component {
    */
   private _onTriggerEnter(event: ITriggerEvent) {
     this._gameManager.addScore()
-    this.node.destroy()
+    PoolManager.instance().putNode(this.node)
     this._gameManager.playAudio('enemy')
   }
 }

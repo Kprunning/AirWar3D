@@ -1,6 +1,7 @@
 import {_decorator, Collider, Component, ITriggerEvent} from 'cc'
 import {BulletDirection} from '../framework/Const'
 import {GameManager} from '../framework/GameManager'
+import {PoolManager} from '../framework/PoolManager'
 
 const {ccclass} = _decorator
 
@@ -18,7 +19,7 @@ export class Bullet extends Component {
   private _targetEnemyId: string = ''
 
 
-  start() {
+  onEnable() {
     // 启用碰撞检测
     let collider = this.getComponent(Collider)
     collider.on('onTriggerEnter', this._onTriggerEnter, this)
@@ -43,13 +44,13 @@ export class Bullet extends Component {
           x = next.x
           z = next.y
         } else {
-          this.node.destroy()
+          PoolManager.instance().putNode(this.node)
         }
       }
     }
     this.node.setPosition(x, position.y, z)
     if (Math.abs(z) > Math.abs(OUT_OF_RANGE)) {
-      this.node.destroy()
+      PoolManager.instance().putNode(this.node)
     }
   }
 
@@ -81,7 +82,7 @@ export class Bullet extends Component {
    * @param event 碰撞事件
    */
   private _onTriggerEnter(event: ITriggerEvent) {
-    this.node.destroy()
+    PoolManager.instance().putNode(this.node)
   }
 
 

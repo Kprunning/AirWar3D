@@ -3,6 +3,7 @@
     "__type__": "cc.Prefab",
     "_name": "bullet01",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "_native": "",
     "data": {
       "__id__": 1
@@ -69,6 +70,7 @@
     "__type__": "cc.Node",
     "_name": "body",
     "_objFlags": 512,
+    "__editorExtras__": {},
     "_parent": {
       "__id__": 1
     },
@@ -115,6 +117,7 @@
     "__type__": "cc.MeshRenderer",
     "_name": "Quad<ModelComponent>",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "node": {
       "__id__": 2
     },
@@ -141,6 +144,9 @@
     "_shadowBias": 0,
     "_shadowNormalBias": 0,
     "_reflectionProbeId": -1,
+    "_reflectionProbeBlendId": -1,
+    "_reflectionProbeBlendWeight": 0,
+    "_enabledGlobalStandardSkinObject": false,
     "_enableMorph": true,
     "_id": ""
   },
@@ -166,8 +172,7 @@
     "_useLightProbe": false,
     "_bakeToLightProbe": true,
     "_reflectionProbeType": 0,
-    "_bakeToReflectionProbe": true,
-    "_probeCubemap": null
+    "_bakeToReflectionProbe": true
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -186,6 +191,7 @@
     "__type__": "2904ePssW5IkI6pasF14Kw5",
     "_name": "",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "node": {
       "__id__": 1
     },
@@ -203,6 +209,7 @@
     "__type__": "cc.BoxCollider",
     "_name": "",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "node": {
       "__id__": 1
     },
@@ -234,6 +241,7 @@
     "__type__": "cc.RigidBody",
     "_name": "",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "node": {
       "__id__": 1
     },
@@ -241,7 +249,7 @@
     "__prefab": {
       "__id__": 12
     },
-    "_group": 16,
+    "_group": 8,
     "_type": 4,
     "_mass": 1,
     "_allowSleep": true,

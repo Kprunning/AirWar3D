@@ -1,10 +1,11 @@
-import {_decorator, BoxCollider, Component, instantiate, Label, macro, math, Node, Prefab, Vec3} from 'cc'
+import {_decorator, BoxCollider, Component, Label, macro, math, Node, Prefab, Vec3} from 'cc'
 import {Bullet} from '../bullet/Bullet'
 import {BulletDirection, BulletPropType, CollisionType, EnemyType, Formation} from './Const'
 import {Enemy} from '../plane/Enemy'
 import {BULLET_PROP_X_RANGE, BulletProp} from '../bullet/BulletProp'
 import {Player} from '../plane/Player'
 import {AudioManager} from './AudioManager'
+import {PoolManager} from './PoolManager'
 
 const {ccclass, property} = _decorator
 
@@ -13,7 +14,7 @@ export class GameManager extends Component {
   @property(Player)
   public playerPlane: Player = null
   /**
-   * 除了1为敌机子弹,其他都为玩家子弹
+   * 除了4为敌机子弹,其他都为玩家子弹
    */
   @property(Prefab)
   public bullet1: Prefab = null
@@ -143,7 +144,7 @@ export class GameManager extends Component {
    * 创建敌机子弹
    */
   public createEnemyBullet(enemyPosition: Vec3) {
-    const bullet = instantiate(this.bullet1)
+    const bullet = PoolManager.instance().getNode(this.bullet4)
     bullet.setParent(this.bulletRoot)
     // 设置子弹位置
     bullet.setPosition(enemyPosition.x, enemyPosition.y, enemyPosition.z + 6)
@@ -151,8 +152,8 @@ export class GameManager extends Component {
     const bulletComponent = bullet.getComponent(Bullet)
     bulletComponent.init(this.bulletSpeed, true)
     // 因为子弹共用,所以设置下分组
-    let collider = bullet.getComponent(BoxCollider)
-    collider.setGroup(CollisionType.ENEMY_BULLET)
+    // let collider = bullet.getComponent(BoxCollider)
+    // collider.setGroup(CollisionType.ENEMY_BULLET)
   }
 
 
@@ -204,9 +205,22 @@ export class GameManager extends Component {
     this.gameOverScore.string = this._score.toString()
     this._isShooting = false
     this.unschedule(this._createBulletProp)
-    // 销毁场景中的敌机和子弹
-    this.node.destroyAllChildren()
-    this.bulletRoot.destroyAllChildren()
+    this._destroyAll()
+  }
+
+  // 销毁场景中的敌机和子弹
+  private _destroyAll() {
+    const length = this.node.children.length
+    // 因为节点是按树形排布,如果从开头删,后面的会往前移.所以从后往前删除
+    for (let i = length - 1; i >= 0; i--) {
+      const child = this.node.children[i]
+      PoolManager.instance().putNode(child)
+    }
+    const bulletLength = this.bulletRoot.children.length
+    for (let i = bulletLength - 1; i >= 0; i--) {
+      const child = this.bulletRoot.children[i]
+      PoolManager.instance().putNode(child)
+    }
   }
 
   /**
@@ -271,7 +285,7 @@ export class GameManager extends Component {
    */
   private _createFormationOne() {
     let {prefab, speed} = this.randomEnemy()
-    const enemy = instantiate(prefab)
+    const enemy = PoolManager.instance().getNode(prefab)
     let component = enemy.getComponent(Enemy)
     // 队形1发射子弹
     component.init(speed, this, true)
@@ -288,7 +302,7 @@ export class GameManager extends Component {
   private _createFormationTwo() {
     let {prefab, speed} = this.randomEnemy()
     for (let i = 0; i < 5; i++) {
-      const enemy = instantiate(prefab)
+      const enemy = PoolManager.instance().getNode(prefab)
       let component = enemy.getComponent(Enemy)
       component.init(speed, this)
       enemy.setParent(this.node)
@@ -303,7 +317,7 @@ export class GameManager extends Component {
     let {prefab, speed} = this.randomEnemy()
     let positionList = [new Vec3(-18, 0, -68), new Vec3(-12, 0, -62), new Vec3(-6, 0, -56)]
     for (let i = 0; i < 7; i++) {
-      const enemy = instantiate(prefab)
+      const enemy = PoolManager.instance().getNode(prefab)
       let component = enemy.getComponent(Enemy)
       component.init(speed, this)
       enemy.setParent(this.node)
@@ -332,7 +346,7 @@ export class GameManager extends Component {
     } else {
       prefab = this.bulletM
     }
-    let bulletProp = instantiate(prefab)
+    let bulletProp = PoolManager.instance().getNode(prefab)
     bulletProp.setParent(this.node)
     // 初始化放在右边
     bulletProp.setPosition(BULLET_PROP_X_RANGE, 0, -50)
@@ -358,7 +372,7 @@ export class GameManager extends Component {
         this._createBulletM()
         break
       default:
-        this._createBulletFault()
+        this._createBulletDefault()
     }
   }
 
@@ -368,7 +382,7 @@ export class GameManager extends Component {
    */
   private _createBulletM() {
     for (let i = 0; i < 2; i++) {
-      const bullet = instantiate(this.bullet2)
+      const bullet = PoolManager.instance().getNode(this.bullet2)
       bullet.setParent(this.bulletRoot)
       let playerPosition = this.playerPlane.node.position
       // 设置子弹位置
@@ -386,7 +400,7 @@ export class GameManager extends Component {
    */
   private _createBulletH() {
     for (let i = 0; i < 3; i++) {
-      const bullet = instantiate(this.bullet3)
+      const bullet = PoolManager.instance().getNode(this.bullet3)
       bullet.setParent(this.bulletRoot)
       let playerPosition = this.playerPlane.node.position
       // 设置子弹位置
@@ -403,7 +417,7 @@ export class GameManager extends Component {
    * 追踪敌机,持续15s后切换回默认子弹
    */
   private _createBulletS() {
-    const bullet = instantiate(this.bullet5)
+    const bullet = PoolManager.instance().getNode(this.bullet5)
     bullet.setParent(this.bulletRoot)
     let playerPosition = this.playerPlane.node.position
     // 设置子弹位置
@@ -431,8 +445,8 @@ export class GameManager extends Component {
   /**
    * 创建玩家默认子弹
    */
-  private _createBulletFault() {
-    const bullet = instantiate(this.bullet1)
+  private _createBulletDefault() {
+    const bullet = PoolManager.instance().getNode(this.bullet1)
     bullet.setParent(this.bulletRoot)
     let playerPosition = this.playerPlane.node.position
     // 设置子弹位置
@@ -440,10 +454,6 @@ export class GameManager extends Component {
     // 设置子弹速度
     const bulletComponent = bullet.getComponent(Bullet)
     bulletComponent.init(this.bulletSpeed)
-    // 因为子弹共用,所以设置下分组
-    let collider = bullet.getComponent(BoxCollider)
-    collider.setGroup(CollisionType.PLAYER_BULLET)
-    collider.setMask(CollisionType.ENEMY)
   }
 
 

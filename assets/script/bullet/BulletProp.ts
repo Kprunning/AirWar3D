@@ -1,6 +1,7 @@
 import {_decorator, Collider, Component, ITriggerEvent} from 'cc'
 import {GameManager} from '../framework/GameManager'
 import {BulletPropType} from '../framework/Const'
+import {PoolManager} from '../framework/PoolManager'
 
 const {ccclass} = _decorator
 
@@ -21,7 +22,7 @@ export class BulletProp extends Component {
   private _gameManager: GameManager = null
 
 
-  start() {
+  onEnable() {
     // 启用碰撞检测
     let collider = this.getComponent(Collider)
     collider.on('onTriggerEnter', this._onTriggerEnter, this)
@@ -35,7 +36,7 @@ export class BulletProp extends Component {
     let z = position.z + this._speedZ * deltaTime
     this.node.setPosition(position.x + this._speedX * deltaTime, position.y, z)
     if (z > this._rangeZ) {
-      this.node.destroy()
+      PoolManager.instance().putNode(this.node)
     }
   }
 
@@ -70,7 +71,7 @@ export class BulletProp extends Component {
     } else {
       this._gameManager.changeBulletType(BulletPropType.BULLET_M)
     }
-    this.node.destroy()
+    PoolManager.instance().putNode(this.node)
   }
 }
 

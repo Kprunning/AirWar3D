@@ -1,4 +1,4 @@
-import {_decorator, Collider, Component, EventTouch, input, Input, ITriggerEvent,AudioSource} from 'cc'
+import {_decorator, AudioSource, Collider, Component, EventTouch, Input, input, ITriggerEvent} from 'cc'
 import {CollisionType} from '../framework/Const'
 
 const {ccclass, property} = _decorator
@@ -18,12 +18,13 @@ export class Player extends Component {
 
   private _audioSource: AudioSource = null
 
-  start() {
+  onEnable() {
     input.on(Input.EventType.TOUCH_MOVE, this._touchMove, this)
     // 启用碰撞检测
     let collider = this.getComponent(Collider)
     collider.on('onTriggerEnter', this._onTriggerEnter, this)
     this._audioSource = this.getComponent(AudioSource)
+    this.init()
   }
 
   onDisable() {

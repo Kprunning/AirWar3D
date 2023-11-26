@@ -3,6 +3,7 @@
     "__type__": "cc.Prefab",
     "_name": "enemy02",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "_native": "",
     "data": {
       "__id__": 1
@@ -73,7 +74,8 @@
     },
     "_prefab": {
       "__id__": 3
-    }
+    },
+    "__editorExtras__": {}
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -227,6 +229,7 @@
     "__type__": "cc.BoxCollider",
     "_name": "",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "node": {
       "__id__": 1
     },
@@ -258,6 +261,7 @@
     "__type__": "cc.RigidBody",
     "_name": "",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "node": {
       "__id__": 1
     },
@@ -294,6 +298,7 @@
     "__type__": "178940ajetObpITqLhUzsb1",
     "_name": "",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "node": {
       "__id__": 1
     },
