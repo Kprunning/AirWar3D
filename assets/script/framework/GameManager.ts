@@ -1,6 +1,6 @@
-import {_decorator, BoxCollider, Component, Label, macro, math, Node, Prefab, Vec3} from 'cc'
+import {_decorator, Component, Label, macro, math, Node, Prefab, Vec3} from 'cc'
 import {Bullet} from '../bullet/Bullet'
-import {BulletDirection, BulletPropType, CollisionType, EnemyType, Formation} from './Const'
+import {BulletDirection, BulletPropType, EnemyType, Formation} from './Const'
 import {Enemy} from '../plane/Enemy'
 import {BULLET_PROP_X_RANGE, BulletProp} from '../bullet/BulletProp'
 import {Player} from '../plane/Player'

@@ -1,7 +1,6 @@
 import {_decorator, Collider, Component, ITriggerEvent} from 'cc'
 import {GameManager} from '../framework/GameManager'
 import {PoolManager} from '../framework/PoolManager'
-import {CollisionType} from '../framework/Const'
 
 const {property, ccclass} = _decorator
 

@@ -750,7 +750,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 674.9060542797495,
+    "_orthoHeight": 640,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -2906,7 +2906,7 @@
     "_id": "8bd4QZx0lJRLEfNVev97Ex"
   },
   {
-    "__type__": "e9ee4BbMmBEOInJ2MOMHy0+",
+    "__type__": "fa73aZYqiJBL5y48A0eULbB",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -2933,7 +2933,7 @@
         "__expectedType__": "cc.AudioClip"
       }
     ],
-    "_id": "b2i5mj6chMRqd7V/LocsAh"
+    "_id": "b9cgSwC1xBOKykHAdjRnhu"
   },
   {
     "__type__": "cc.Node",
